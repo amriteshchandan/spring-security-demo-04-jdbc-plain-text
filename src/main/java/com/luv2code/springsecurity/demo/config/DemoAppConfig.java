@@ -4,7 +4,6 @@ import java.beans.PropertyVetoException;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
-import javax.swing.plaf.basic.ComboPopup;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +20,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "com.luv2code.springsecurity.demo")
-@PropertySource("persistence-mysql.properties")
+@PropertySource("classpath:persistence-mysql.properties")
 public class DemoAppConfig {
 	
 	@Autowired
@@ -43,27 +42,40 @@ public class DemoAppConfig {
 	public DataSource getDataSource() {
 		
 		ComboPooledDataSource securityDataSource = new ComboPooledDataSource();
+		
 		try {
+			logger.info("jdbc.driver >>>> " + env.getProperty("jdbc.driver"));
+			logger.info("jdbc.url >>>> " + env.getProperty("jdbc.url"));
+			logger.info("jdbc.user >>>> " + env.getProperty("jdbc.user"));
+			logger.info("jdbc.password >>>> " + env.getProperty("jdbc.password"));
+			logger.info("connection.pool.initialPoolSize >>>> " + getPropertyAsInt("connection.pool.initialPoolSize"));
+			logger.info("connection.pool.minPoolSize >>>> " + getPropertyAsInt("connection.pool.minPoolSize"));
+			logger.info("connection.pool.maxPoolSize >>>> " + getPropertyAsInt("connection.pool.maxPoolSize"));
+			logger.info("connection.pool.maxIdleTime >>>> " + getPropertyAsInt("connection.pool.maxIdleTime"));
+			
 			securityDataSource.setDriverClass(env.getProperty("jdbc.driver"));
 			securityDataSource.setJdbcUrl(env.getProperty("jdbc.url"));
 			securityDataSource.setUser(env.getProperty("jdbc.user"));
 			securityDataSource.setPassword(env.getProperty("jdbc.password"));
 			
-			securityDataSource.setInitialPoolSize(getPropertyAsInt(env.getProperty("connection.pool.initialPoolSize")));
-			securityDataSource.setMinPoolSize(getPropertyAsInt(env.getProperty("connection.pool.minPoolSize")));
-			securityDataSource.setMaxPoolSize(getPropertyAsInt(env.getProperty("connection.pool.maxPoolSize")));
-			securityDataSource.setMaxIdleTime(getPropertyAsInt(env.getProperty("connection.pool.maxIdleTime")));
+			securityDataSource.setInitialPoolSize(getPropertyAsInt("connection.pool.initialPoolSize"));
+			securityDataSource.setMinPoolSize(getPropertyAsInt("connection.pool.minPoolSize"));
+			securityDataSource.setMaxPoolSize(getPropertyAsInt("connection.pool.maxPoolSize"));
+			securityDataSource.setMaxIdleTime(getPropertyAsInt("connection.pool.maxIdleTime"));
 			
-		} catch (PropertyVetoException e) {
+		} catch (PropertyVetoException pve) {
+			logger.info("Exception Here 1");
+			pve.printStackTrace();
+		} catch (Exception e) {
+			logger.info("Exception Here 2");
 			e.printStackTrace();
 		}
-		
-		
-		return null;
+		return securityDataSource;
 		
 	}
 	
 	private int getPropertyAsInt(String propName) {
+		logger.info("propName :: " + propName + " ::length:: " + propName.length());
 		String propValue = env.getProperty(propName);
 		return Integer.parseInt(propValue);
 	}
